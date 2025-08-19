@@ -78,10 +78,10 @@ namespace ExcelToXML
                     List<int> highlightedRows = GetHighlightedRows(excelFilePath);
                     Console.WriteLine($"Found {highlightedRows.Count} highlighted rows: {string.Join(", ", highlightedRows.OrderBy(x => x))}");
 
-                    int rowNumber = 1;
+                    int rowNumber = 0;
                     for (int rowIndex = 1; rowIndex <= sheet.LastRowNum; rowIndex++)
                     {
-                        rowNumber++;
+                        rowNumber = rowIndex + 1;
                         var row = sheet.GetRow(rowIndex);
                         if (row == null) continue;
 
@@ -125,10 +125,10 @@ namespace ExcelToXML
 
                                 var contactInfo = ParseContactInfo(contact);
 
-                                string baseId = !string.IsNullOrEmpty(id) ? id : $"ORD-{date:yyyyMMdd}-{city?.Replace(" ", "")}";
+                                string baseId = !string.IsNullOrEmpty(id) ? id : $"ORD-{city?.Replace(" ", "")}";
                                 string shipName = !string.IsNullOrEmpty(contactInfo.Name) ? contactInfo.Name : "User";
                                 string shippingKey = $"{city}-{contactInfo.Region}".Replace(" ", "").Replace(",", "");
-                                string UniqueId = $"{baseId}-{shipName}-{shippingKey}-{date:yyyyMMdd_HHmmss}";
+                                string UniqueId = $"{baseId}-{shipName}-{shippingKey}-{date:yyyyMMdd}";
 
                                 if (!orderGroups.ContainsKey(UniqueId))
                                 {
@@ -187,7 +187,8 @@ namespace ExcelToXML
                     {
                         var cell = worksheet.Cell(row, 1);
                         if (cell.Style.Fill.BackgroundColor.Color.Name != "Transparent" &&
-                            cell.Style.Fill.BackgroundColor.Color.Name != "White")
+                            cell.Style.Fill.BackgroundColor.Color.Name != "White" &&
+                            cell.Style.Fill.BackgroundColor.Color.Name != "000000")
                         {
                             highlightedRows.Add(row);
                         }
@@ -198,7 +199,7 @@ namespace ExcelToXML
             return highlightedRows;
         }
 
-        private ContactInfo ParseContactInfo(string contact)
+        private static ContactInfo ParseContactInfo(string contact)
         {
             if (contact.Contains(","))
             {
